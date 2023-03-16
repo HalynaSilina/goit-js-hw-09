@@ -8,16 +8,16 @@ startBtn.addEventListener('click', handleChangeColorBtnStartClick);
 stopBtn.addEventListener('click', handleChangeColorBtnStopClick);
 
 function handleChangeColorBtnStartClick() {
-    startBtn.classList.add('js-btn-disabled');
-    stopBtn.classList.remove('js-btn-disabled');  
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
   intervalId = setInterval(() => {
     pageBackground.style.backgroundColor = getRandomHexColor();
   }, DELAY);
 }
 
 function handleChangeColorBtnStopClick() {
-    startBtn.classList.remove('js-btn-disabled');
-    stopBtn.classList.add('js-btn-disabled');
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
   clearInterval(intervalId);
 }
 
