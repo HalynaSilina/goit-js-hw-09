@@ -8,9 +8,10 @@ const hoursLeft = document.querySelector('.value[data-hours]');
 const minutesLeft = document.querySelector('.value[data-minutes]');
 const secondsLeft = document.querySelector('.value[data-seconds]');
 const DELAY = 1000;
-let intervalId = null;
 
 timerStartBtn.disabled = true;
+
+// Об'єкт налаштувань для бібліотеки
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -18,29 +19,59 @@ const options = {
   minuteIncrement: 1,
   onClose(selectedDates) {
     dataAudit(selectedDates);
-    timerStartBtn.disabled = false;
   },
   onValueUpdate(selectedDates) {
     dataAudit(selectedDates);
-    clearInterval(intervalId);
+    clearInterval(timer.intervalId);
   },
 };
+
+// Ініціалізація бібліотеки
 const fp = flatpickr('#datetime-picker', options);
 
-timerStartBtn.addEventListener('click', handleTimerBtnStartClick);
+// Створення таймеру
+class Timer {
+  constructor({ onTick }) {
+    this.intervalId = null;
+    this.onTick = onTick;
+  }
+  start() {
+    const futureDate = fp.selectedDates[0];
+    this.intervalId = setInterval(() => {
+      const currentTime = new Date();
+      const time = futureDate - currentTime;
+      const timerValue = convertMs(time);
+      this.onTick(timerValue);
+    }, DELAY);
+  }
+}
 
-function handleTimerBtnStartClick() {
-  const futureDate = fp.selectedDates[0];
-  intervalId = setInterval(() => {
-    const currentTime = new Date();
-    const time = futureDate - currentTime;
-    const { days, hours, minutes, seconds } = convertMs(time);
-    daysLeft.textContent = days;
-    hoursLeft.textContent = hours;
-    minutesLeft.textContent = minutes;
-    secondsLeft.textContent = seconds;
-    console.log(`${days}:${hours}:${minutes}:${seconds}`);
-  }, DELAY);
+const timer = new Timer({
+  onTick: timerUpdate,
+});
+
+timerStartBtn.addEventListener('click', timer.start.bind(timer));
+
+function dataAudit(data) {
+  const currentDate = new Date();
+  if (data[0] - currentDate <= 0) {
+    timerStartBtn.disabled = true;
+    return Notify.failure('Please choose a date in the future', {
+      showOnlyTheLastOne: true,
+    });
+  }
+  timerStartBtn.disabled = false;
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
+
+function timerUpdate(timerValue) {
+  daysLeft.textContent = addLeadingZero(timerValue.days);
+  hoursLeft.textContent = addLeadingZero(timerValue.hours);
+  minutesLeft.textContent = addLeadingZero(timerValue.minutes);
+  secondsLeft.textContent = addLeadingZero(timerValue.seconds);
 }
 
 function convertMs(ms) {
@@ -60,11 +91,4 @@ function convertMs(ms) {
   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
-}
-
-function dataAudit(data) {
-  const currentDate = new Date();
-  if (data[0] - currentDate <= 0) {
-    return Notify.failure('Please choose a date in the future', {showOnlyTheLastOne: true});
-  }
 }
