@@ -42,6 +42,7 @@ class Timer {
       const time = futureDate - currentTime;
       const timerValue = convertMs(time);
       this.onTick(timerValue);
+      timerStartBtn.disabled = true;
     }, DELAY);
   }
 }
