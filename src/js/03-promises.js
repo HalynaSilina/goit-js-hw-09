@@ -7,7 +7,6 @@ createPromiseForm.addEventListener('submit', handleCreatePromiseFormSubmit);
 function handleCreatePromiseFormSubmit(e) {
   e.preventDefault();
   const {elements: {delay, step, amount}}= e.currentTarget;
-  console.log (e.currentTarget.elements);
   let userDelay = Number(delay.value);
   const userStep = Number(step.value);
   const userAmount = Number(amount.value);
